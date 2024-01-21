@@ -12,8 +12,8 @@ function Header() {
             name: 'Home',
             slug: "/",
             active: true
-          }, 
-          {
+        }, 
+        {
             name: "Login",
             slug: "/login",
             active: !authStatus,
@@ -32,7 +32,7 @@ function Header() {
             name: "Add Post",
             slug: "/add-post",
             active: authStatus,
-        },
+        }
 
     ]
 
