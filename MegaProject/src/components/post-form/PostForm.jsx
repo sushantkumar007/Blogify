@@ -9,7 +9,7 @@ export default function PostForm({ post }) {
     const { register, handleSubmit, watch, setValue, control, getValues } = useForm({
         defaultValues: {
             title: post?.title || "",
-            slug: post?.$id || "",
+            slug: post?.slug || "",
             content: post?.content || "",
             status: post?.status || "active",
         },
@@ -19,7 +19,6 @@ export default function PostForm({ post }) {
     const userData = useSelector((state) => state.auth.userData);
 
     const submit = async (data) => {
-        console.log(data)
         if (post) {
             const file = data.image[0] ? await appwriteService.uploadFile(data.image[0]) : null;
 
@@ -37,11 +36,9 @@ export default function PostForm({ post }) {
             }
         } else {
             const file = await appwriteService.uploadFile(data.image[0]);
-            console.log(file)
             if (file) {
                 const fileId = file.$id;
-                // data.featuredImage = fileId;
-                // console.log(fileId)
+
                 const dbPost = await appwriteService.createPost({ ...data, featuredImage: fileId, userId: userData.$id });
 
                 if (dbPost) {
