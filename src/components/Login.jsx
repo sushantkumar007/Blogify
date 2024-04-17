@@ -76,7 +76,7 @@ function Login() {
                 />
                 <Button
                 type="submit"
-                className="w-full bg-[#ca8765]"
+                className="w-full bg-[#cd815b]"
                 >Sign in</Button>
             </div>
         </form>
