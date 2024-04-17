@@ -1,48 +1,60 @@
 import React, { useCallback } from "react";
 import { useForm } from "react-hook-form";
 import { Button, Input, RTE, Select } from "../index";
-import appwriteService from "../../appwrite/config";
+import { databaseService, storageService } from "../../appwrite/index";
 import { useNavigate } from "react-router-dom";
-import { useSelector } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
+import { addPosts, removePosts } from "../../store/postsSlice";
 
 export default function PostForm({ post }) {
     const { register, handleSubmit, watch, setValue, control, getValues } = useForm({
         defaultValues: {
             title: post?.title || "",
-            slug: post?.slug || "",
+            slug: post?.$id || "",
             content: post?.content || "",
             status: post?.status || "active",
         },
     });
 
     const navigate = useNavigate();
+    const dispatch = useDispatch()
     const userData = useSelector((state) => state.auth.userData);
 
     const submit = async (data) => {
         if (post) {
-            const file = data.image[0] ? await appwriteService.uploadFile(data.image[0]) : null;
+            const file = data.image[0] ? await storageService.uploadFile(data.image[0]) : null;
 
             if (file) {
-                appwriteService.deleteFile(post.featuredImage);
+                storageService.deleteFile(post.featuredImage);
             }
 
-            const dbPost = await appwriteService.updatePost(post.$id, {
+            const dbPost = await databaseService.updatePost(post.$id, {
                 ...data,
                 featuredImage: file ? file.$id : undefined,
             });
 
             if (dbPost) {
+                // dispatch(removePosts());
+                databaseService.getPosts().then((posts) => {
+                    const allPosts = posts.documents
+                    dispatch(addPosts({allPosts}))
+                })
                 navigate(`/post/${dbPost.$id}`);
             }
         } else {
-            const file = await appwriteService.uploadFile(data.image[0]);
+            const file = await storageService.uploadFile(data.image[0]);
             if (file) {
                 const fileId = file.$id;
                 const USERID = userData.$id;
 
-                const dbPost = await appwriteService.createPost({ ...data, featuredImage: fileId, userId: USERID });
+                const dbPost = await databaseService.createPost({ ...data, featuredImage: fileId, userId: USERID });
 
                 if (dbPost) {
+                    // dispatch(removePosts());
+                    databaseService.getPosts().then((posts) => {
+                    const allPosts = posts.documents
+                    dispatch(addPosts({allPosts}))
+                })
                     navigate(`/post/${dbPost.$id}`);
                 }
             }
@@ -71,7 +83,7 @@ export default function PostForm({ post }) {
     }, [watch, slugTransform, setValue]);
 
     return (
-        <form onSubmit={handleSubmit(submit)} className="flex flex-wrap">
+        <form onSubmit={handleSubmit(submit)} className="flex flex-wrap bg-[#b8b8b8] rounded-xl px-4 py-6">
             <div className="w-2/3 px-2">
                 <Input
                     label="Title :"
@@ -101,7 +113,7 @@ export default function PostForm({ post }) {
                 {post && (
                     <div className="w-full mb-4">
                         <img
-                            src={appwriteService.getFilePreview(post.featuredImage)}
+                            src={storageService.getFilePreview(post.featuredImage)}
                             alt={post.title}
                             className="rounded-lg"
                         />

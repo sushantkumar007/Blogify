@@ -4,7 +4,7 @@ import App from './App.jsx'
 import './index.css'
 import { Provider } from 'react-redux'
 import store from './store/store.js'
-import { RouterProvider, createBrowserRouter, createRoutesFromElements, Route } from 'react-router-dom'
+import { RouterProvider, createBrowserRouter } from 'react-router-dom'
 import { AuthLayout } from './components/index.js'
 import { AddPost, Signup, EditPost, Post, AllPosts, Home, Login } from './pages/index.js' 
 

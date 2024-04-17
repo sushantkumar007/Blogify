@@ -1,14 +1,16 @@
 import React, { useEffect, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
-import appwriteService from "../appwrite/config";
+import { databaseService, storageService } from "../appwrite/index";
 import { Button, Container } from "../components";
 import parse from "html-react-parser";
-import { useSelector } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
+import { addPosts, removePosts } from "../store/postsSlice";
 
 export default function Post() {
     const [post, setPost] = useState(null);
     const { slug } = useParams();
     const navigate = useNavigate();
+    const dispatch = useDispatch()
 
     const userData = useSelector((state) => state.auth.userData);
 
@@ -16,7 +18,7 @@ export default function Post() {
 
     useEffect(() => {
         if (slug) {
-            appwriteService.getPost(slug).then((post) => {
+            databaseService.getPost(slug).then((post) => {
                 if (post) setPost(post);
                 else navigate("/");
             });
@@ -24,20 +26,27 @@ export default function Post() {
     }, [slug, navigate]);
 
     const deletePost = () => {
-        appwriteService.deletePost(post.$id).then((status) => {
+        databaseService.deletePost(post.$id).then((status) => {
             if (status) {
-                appwriteService.deleteFile(post.featuredImage);
+                storageService.deleteFile(post.featuredImage).then((status) => {
+                    if (status) {
+                        databaseService.getPosts().then((posts) => {
+                            const allPosts = posts.documents
+                            dispatch(addPosts({allPosts}))
+                        })
+                    }
+                })
                 navigate("/");
             }
         });
     };
 
     return post ? (
-        <div className="py-8">
+        <div className="py-8 min-h-80">
             <Container>
                 <div className="w-full flex justify-center mb-4 relative border rounded-xl p-2">
                     <img
-                        src={appwriteService.getFilePreview(post.featuredImage)}
+                        src={storageService.getFilePreview(post.featuredImage)}
                         alt={post.title}
                         className="rounded-xl"
                     />
