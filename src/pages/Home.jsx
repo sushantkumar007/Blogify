@@ -11,23 +11,21 @@ function Home() {
     const allPosts = useSelector((state) => state.posts.allPosts)
         
     useEffect(() => {
-        if (authStatus) {
-            if (allPosts.length > 0) {
+        if (authStatus && allPosts.length > 0) {
                 setPosts(allPosts)
             } else {
                 setPosts([])
             }
-        } else {
-            setPosts([])
-        }
-    }, [authStatus, allPosts])
+        }, [authStatus, allPosts])
 
     useEffect(() => {
-        databaseService.getPosts()
-        .then((posts) => {
-          const allPosts = posts.documents;
-          dispatch(addPosts({allPosts}));
+        if (authStatus) {
+            databaseService.getPosts()
+            .then((posts) => {
+            const allPosts = posts.documents;
+            dispatch(addPosts({allPosts}));
         })
+        }
     }, [])
   
     if (posts.length === 0) { 

@@ -9,8 +9,6 @@ function App() {
   const [loading, setLoading] = useState(true)
   const dispatch = useDispatch()
 
-  console.log("App is call")
-
   useEffect(() => {
     authService.getCurrentUser()
     .then((userData) => {
@@ -25,7 +23,7 @@ function App() {
   
   return !loading ? (
     <div className='min-h-screen flex flex-wrap content-between bg-[#FBF3D5]'>
-      <div className='w-full block'>
+      <div className='w-full min-h-screen block'>
         <div className='sticky top-0 z-10'>
           <Header />
         </div>
